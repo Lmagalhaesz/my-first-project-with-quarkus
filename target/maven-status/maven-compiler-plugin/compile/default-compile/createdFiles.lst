@@ -1,0 +1,6 @@
+com/magalhaes/service/DirectoryService.class
+com/magalhaes/model/Directory.class
+com/magalhaes/model/User.class
+com/magalhaes/model/Document.class
+com/magalhaes/service/UserService.class
+com/magalhaes/service/DocumentService.class
