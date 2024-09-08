@@ -16,4 +16,6 @@ public class DirectoryService {
         this.mongoClient = mongoClient;
         this.coll = mongoClient.getDatabase("test").getCollection("directories", Directory.class);
     }
+
+    
 }

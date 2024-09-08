@@ -23,7 +23,6 @@ public class User {
     private ObjectId id;
     private String email;
     private String name;
-    private Directory directory;
     private String password;
 
     public void setPassword(String pswdString) {
