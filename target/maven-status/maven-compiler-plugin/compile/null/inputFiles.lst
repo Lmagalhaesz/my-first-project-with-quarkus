@@ -1,6 +1,9 @@
 /home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/controller/DocumentController.java
+/home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/controller/UserController.java
+/home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/dto/UserDTO.java
 /home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/model/Directory.java
 /home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/model/Document.java
+/home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/model/DocumentResponse.java
 /home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/model/User.java
 /home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/service/DirectoryService.java
 /home/leonardo/Documentos/Development/Quarkus/my-first-project-with-quarkus/src/main/java/com/magalhaes/service/DocumentService.java

@@ -15,8 +15,15 @@ public class UserDTO {
     private String email;
 
     public UserDTO(User user) {
-        this.id = user.getId();
-        this.nome = user.getName();
-        this.email = user.getEmail();
+        if (user != null) {
+            this.id = user.getId();
+            this.nome = user.getName();
+            this.email = user.getEmail();
+        } else {
+            // Defina valores padrão ou lance uma exceção personalizada
+            this.id = null;
+            this.nome = "Usuário Desconhecido";
+            this.email = "Email não disponível";
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.magalhaes.service;
 
-import com.magalhaes.model.Document;
+import java.util.List;
+import java.util.ArrayList;
+
 import com.magalhaes.model.User;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -17,5 +19,15 @@ public class UserService {
         this.mongoClient = mongoClient;
         this.coll = mongoClient.getDatabase("test").getCollection("users", User.class);
     }
+
+    public String addUser(User user) {
+        user.setPassword(user.getPassword());
+        return coll.insertOne(user).getInsertedId().asObjectId().getValue().toHexString();
+    }
+
+    public List<User> getUsers() {
+        return coll.find().into(new ArrayList<>());
+    }
+
       
 }
