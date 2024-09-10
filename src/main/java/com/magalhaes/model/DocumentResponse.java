@@ -2,6 +2,8 @@ package com.magalhaes.model;
 
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.magalhaes.dto.UserDTO;
 
 import lombok.AllArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DocumentResponse {
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
     private String titulo;
     private String conteudo;

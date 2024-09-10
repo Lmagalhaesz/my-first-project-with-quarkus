@@ -3,6 +3,7 @@ package com.magalhaes.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.magalhaes.model.Document;
@@ -11,6 +12,7 @@ import com.magalhaes.model.User;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import static com.mongodb.client.model.Filters.eq;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -72,5 +74,10 @@ public class DocumentService {
 
     public String addDocument(Document document) {
         return documentCollection.insertOne(document).getInsertedId().asObjectId().getValue().toHexString();
+    }
+
+    public long deleteDocument(String id) {
+        Bson filter = eq("_id", new ObjectId(id));
+        return documentCollection.deleteOne(filter).getDeletedCount();
     }
 }

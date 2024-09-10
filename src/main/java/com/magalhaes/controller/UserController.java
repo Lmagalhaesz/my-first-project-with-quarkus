@@ -10,6 +10,7 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -32,17 +33,23 @@ public class UserController {
     }
 
     // Endpoint para obter um documento por ID
-    /*@GET
-    @Path("/document/{id}")
-    public User getDocumentById(@PathParam("id") String id) {
-        return userService(id);
-    }*/
+    @GET
+    @Path("/user/{id}")
+    public User getUserById(@PathParam("id") String id) {
+        return userService.getUserById(id);
+    }
 
     // Endpoint para adicionar um novo documento
     @POST
     @Path("/user")
     public String addUser(User user) {
         return userService.addUser(user);
+    }
+
+    @DELETE
+    @Path("/document/{id}")
+    public long deleteDocument(@PathParam("id") String id) {
+        return userService.deleteUser(id);
     }
 
 }

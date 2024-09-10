@@ -2,6 +2,8 @@ package com.magalhaes.dto;
 
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.magalhaes.model.User;
 
 import lombok.Getter;
@@ -10,6 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserDTO {
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
     private String nome;
     private String email;

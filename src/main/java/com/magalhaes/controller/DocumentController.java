@@ -7,6 +7,7 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -40,6 +41,12 @@ public class DocumentController {
     @Path("/document")
     public String addDocument(Document document) {
         return documentService.addDocument(document);
+    }
+
+    @DELETE
+    @Path("/document/{id}")
+    public long deleteDocument(@PathParam("id") String id) {
+        return documentService.deleteDocument(id);
     }
 
 }
