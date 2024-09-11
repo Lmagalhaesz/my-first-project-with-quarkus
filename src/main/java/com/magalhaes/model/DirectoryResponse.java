@@ -6,25 +6,29 @@ import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.magalhaes.dto.DocumentDTO;
+import com.magalhaes.dto.UserDTO;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
-public class Directory {
-
+public class DirectoryResponse {
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
     private String name;
-    private ObjectId userId;
-    private List<ObjectId> documentsId;
+    private List<Document> documents;
+    private UserDTO owner;  // Informações do dono
 
+    public DirectoryResponse(Directory directory, List<Document> documents, User user) {
+        this.id = directory.getId();
+        this.name = directory.getName();
+        this.documents = documents;
+        this.owner = new UserDTO(user);  // Converte o usuário para o DTO
+    }
 }

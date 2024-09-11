@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.mongodb.lang.NonNull;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -21,7 +22,10 @@ public class Document {
 
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId userId;
+    @NonNull
     private String title;
+    @NonNull
     private String content;
 }
