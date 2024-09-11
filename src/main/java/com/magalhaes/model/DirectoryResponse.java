@@ -6,7 +6,6 @@ import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.magalhaes.dto.DocumentDTO;
 import com.magalhaes.dto.UserDTO;
 
 import lombok.AllArgsConstructor;

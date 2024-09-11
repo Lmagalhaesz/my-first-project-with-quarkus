@@ -1,9 +1,6 @@
 package com.magalhaes.controller;
 
-import com.magalhaes.model.Document;
-import com.magalhaes.model.DocumentResponse;
 import com.magalhaes.model.User;
-import com.magalhaes.service.DocumentService;
 import com.magalhaes.service.UserService;
 
 import java.util.List;

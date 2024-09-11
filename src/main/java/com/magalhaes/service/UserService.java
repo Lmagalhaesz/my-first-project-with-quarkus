@@ -7,7 +7,11 @@ import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 
+import com.magalhaes.exceptions.DataBaseErrorException;
+import com.magalhaes.exceptions.UserErrorException;
+import com.magalhaes.exceptions.enums.ErrorCodeEnum;
 import com.magalhaes.model.User;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -28,8 +32,15 @@ public class UserService {
     }
 
     public String addUser(User user) {
-        user.setPassword(user.getPassword());
-        return coll.insertOne(user).getInsertedId().asObjectId().getValue().toHexString();
+        String add = null;
+        try {
+            user.setPassword(user.getPassword());
+            add = coll.insertOne(user).getInsertedId().asObjectId().getValue().toHexString();
+        } catch (MongoException e) {
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+        }
+        if(add == null) throw new UserErrorException("O usuário é nulo", ErrorCodeEnum.UE0001.getCode());
+        return add;
     }
 
     public List<User> getUsers() {
