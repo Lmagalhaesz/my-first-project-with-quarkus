@@ -7,6 +7,8 @@ public enum ErrorCodeEnum {
 
     UE0001("User error", "UE-0001"),
 
+    DIRE0001("Directory error", "DIRE-0001"),
+
     GE0001("Generic Error", "GE-0001");
 
     private String msg;

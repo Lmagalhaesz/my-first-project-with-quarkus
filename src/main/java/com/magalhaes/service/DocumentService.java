@@ -54,7 +54,6 @@ public class DocumentService {
     } catch (DocumentErrorException e) {
         throw e;
     } catch (Exception e) {
-        // Captura exceções gerais
         throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
     }
     if(documentResponses.size() == 0) throw new DocumentErrorException("Nenhum documento encontrado.", ErrorCodeEnum.DE0001.getCode()); 

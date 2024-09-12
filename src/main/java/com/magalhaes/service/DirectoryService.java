@@ -3,12 +3,19 @@ package com.magalhaes.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
+import com.magalhaes.exceptions.DataBaseErrorException;
+import com.magalhaes.exceptions.DirectoryErrorException;
+import com.magalhaes.exceptions.GenericException;
+import com.magalhaes.exceptions.enums.ErrorCodeEnum;
 import com.magalhaes.model.Directory;
 import com.magalhaes.model.DirectoryResponse;
 import com.magalhaes.model.Document;
 import com.magalhaes.model.User;
+import com.mongodb.MongoException;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -29,39 +36,78 @@ public class DirectoryService {
         this.userCollection = mongoClient.getDatabase("test").getCollection("users", User.class);
     }
 
-    // Método para obter todos os documentos com os detalhes do dono (owner)
    public List<DirectoryResponse> getDirectories() {
-    // Lista para armazenar a resposta
     List<DirectoryResponse> directoryResponses = new ArrayList<>();
 
-    // Busca todos os diretórios
-    List<Directory> directories = coll.find().into(new ArrayList<>());
-
-    // Para cada diretório, buscar o usuário dono e criar a resposta
-    for (Directory directory : directories) {
-        // Busca o usuário pelo userId do diretório
-        User user = userCollection.find(Filters.eq("_id", directory.getUserId())).first();
+    try {
+        List<Directory> directories = coll.find().into(new ArrayList<>());
         
-        // Inicializa a lista de documentos associados a este diretório
-        List<Document> directoryDocuments = new ArrayList<>();
+        for (Directory directory : directories) {
+        
+            User user = userCollection.find(Filters.eq("_id", directory.getUserId())).first();
+        
+    
+            List<Document> directoryDocuments = new ArrayList<>();
 
-        // Busca os documentos relacionados ao diretório pelo ID dos documentos
-        for (ObjectId documentId : directory.getDocumentsId()) {
-            Document document = documentCollection.find(Filters.eq("_id", documentId)).first();
-            if (document != null) {
-                directoryDocuments.add(document); // Adiciona o documento encontrado
+        
+            for (ObjectId documentId : directory.getDocumentsId()) {
+                Document document = documentCollection.find(Filters.eq("_id", documentId)).first();
+                if (document != null) {
+                    directoryDocuments.add(document); // Adiciona o documento encontrado
+                }
             }
-        }
-
-        // Cria o objeto DirectoryResponse
+        if(directory == null) throw new DirectoryErrorException("Diretórios não encontrados.", ErrorCodeEnum.DIRE0001.getCode());
+        if(user == null) throw new DirectoryErrorException("Usuário de tal diretório não encontrado.", ErrorCodeEnum.DIRE0001.getCode());
         DirectoryResponse directoryResponse = new DirectoryResponse(directory, directoryDocuments, user);
         directoryResponses.add(directoryResponse);
     }
-
-    // Retorna a lista de DirectoryResponse
+    } catch (MongoWriteException e) {
+        // Exceção específica para falhas na escrita
+        throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+    } catch (MongoException e) {
+        // Exceção geral do MongoDB
+        throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+    } catch (IllegalArgumentException e) {
+        // Exceção para argumentos inválidos, se aplicável
+        throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+    } catch (Exception e) {
+        // Captura exceções gerais
+        throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+    }
+    if(directoryResponses.isEmpty()) throw new DirectoryErrorException("Não foi possível listar os diretórios.", ErrorCodeEnum.DIRE0001.getCode());
     return directoryResponses;
 }
 public String addDirectory(Directory directory) {
-    return coll.insertOne(directory).getInsertedId().asObjectId().getValue().toHexString();
+    String response = null;
+    try {
+        // Verifica se já existe um diretório com o mesmo nome
+        Bson filter = Filters.eq("name", directory.getName());
+        long count = coll.countDocuments(filter);
+
+        if (count > 0) {
+            directory.setName(directory.getName() + " - copy");
+        }
+
+        // Insere o novo diretório
+        response = coll.insertOne(directory).getInsertedId().asObjectId().getValue().toHexString();
+    } catch (MongoWriteException e) {
+        // Exceção específica para falhas na escrita
+        throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+    } catch (MongoException e) {
+        // Exceção geral do MongoDB
+        throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+    } catch (IllegalArgumentException e) {
+        // Exceção para argumentos inválidos, se aplicável
+        throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+    } catch (Exception e) {
+        // Captura exceções gerais
+        throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+    }
+
+    if (response == null) {
+        throw new DirectoryErrorException("Diretório não pôde ser criado", ErrorCodeEnum.DIRE0001.getCode());
+    }
+
+    return response;
 }
 }

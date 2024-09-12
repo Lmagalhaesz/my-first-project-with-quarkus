@@ -34,26 +34,74 @@ public class UserService {
     public String addUser(User user) {
         String add = null;
         try {
+            List<User> users = this.getUsers();
+            for(User userf : users){
+                if(userf.getEmail().equals(user.getEmail())){
+                    throw new UserErrorException("Já existe tal usuário cadastrado", ErrorCodeEnum.UE0001.getCode());
+                }
             user.setPassword(user.getPassword());
             add = coll.insertOne(user).getInsertedId().asObjectId().getValue().toHexString();
+            }
         } catch (MongoException e) {
             throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
         }
-        if(add == null) throw new UserErrorException("O usuário é nulo", ErrorCodeEnum.UE0001.getCode());
+        if(add == null) throw new UserErrorException("Erro ao cadastrar usuário.", ErrorCodeEnum.UE0001.getCode());
         return add;
     }
 
     public List<User> getUsers() {
-        return coll.find().into(new ArrayList<>());
+        List<User> users = new ArrayList<>(); 
+    try {
+        users = coll.find().into(new ArrayList<>());
+    } catch (MongoException e) {
+        throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+    }
+
+    if (users.isEmpty()) throw new UserErrorException("Não há nenhum usuário cadastrado", ErrorCodeEnum.UE0001.getCode());
+
+    return users;
     }
 
     public User getUserById(String id){
-        return coll.find(Filters.eq("_id", new ObjectId(id) )).first();
+        try {
+            User user = coll.find(Filters.eq("_id", new ObjectId(id))).first();
+            
+            if (user == null) {
+                throw new UserErrorException("Não há usuário cadastrado com este ID: " + id, ErrorCodeEnum.UE0001.getCode());
+            }
+            
+            return user;
+    
+        } catch (IllegalArgumentException e) {
+            throw new UserErrorException("ID fornecido é inválido: " + id, ErrorCodeEnum.UE0001.getCode());
+            
+        } catch (MongoException e) {
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+        }
     }
 
     public long deleteUser(String id) {
-        Bson filter = eq("_id", new ObjectId(id));
-        return coll.deleteOne(filter).getDeletedCount();
+        try {
+            Bson filter = eq("_id", new ObjectId(id));
+            
+            long deletedCount = coll.deleteOne(filter).getDeletedCount();
+            
+            if (deletedCount == 0) {
+                throw new UserErrorException("Não há usuário cadastrado com este ID: " + id, ErrorCodeEnum.UE0001.getCode());
+            }
+            
+            return deletedCount;
+        
+        } catch (IllegalArgumentException e) {
+            // Captura erros de formatação de ObjectId inválido
+            throw new UserErrorException("ID fornecido é inválido: " + id, ErrorCodeEnum.UE0001.getCode());
+        
+        } catch (MongoException e) {
+            // Captura erros de banco de dados
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+        }
+        
+        
     }
       
 }
