@@ -14,6 +14,7 @@ import com.magalhaes.model.Document;
 import com.magalhaes.model.DocumentResponse;
 import com.magalhaes.model.User;
 import com.mongodb.MongoException;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -76,11 +77,19 @@ public class DocumentService {
 
         if(user == null) throw new DocumentErrorException("Usuário não encontrado para o documento: " + document.getId(), ErrorCodeEnum.DE0001.getCode());
 
+        } catch (MongoWriteException e) {
+            // Exceção específica para falhas na escrita
+            throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
         } catch (MongoException e) {
-            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
-        } catch (DocumentErrorException e) {
-            throw e;
+            // Exceção geral do MongoDB
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (IllegalArgumentException e) {
+            // Exceção para argumentos inválidos, se aplicável
+            throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         } catch (Exception e) {
+            // Captura exceções gerais
             throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
         
@@ -92,8 +101,20 @@ public class DocumentService {
         String add = null;
         try {
             add = documentCollection.insertOne(document).getInsertedId().asObjectId().getValue().toHexString();
+        } catch (MongoWriteException e) {
+            // Exceção específica para falhas na escrita
+            throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
         } catch (MongoException e) {
-            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+            // Exceção geral do MongoDB
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (IllegalArgumentException e) {
+            // Exceção para argumentos inválidos, se aplicável
+            throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        } catch (Exception e) {
+            // Captura exceções gerais
+            throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
         if (add == null) throw new DocumentErrorException("Erro ao adicionar documento", ErrorCodeEnum.DE0001.getCode()); 
         return add;
@@ -104,8 +125,20 @@ public class DocumentService {
         try {
             Bson filter = eq("_id", new ObjectId(id));
             delete = documentCollection.deleteOne(filter).getDeletedCount();
+        } catch (MongoWriteException e) {
+            // Exceção específica para falhas na escrita
+            throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
         } catch (MongoException e) {
-            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+            // Exceção geral do MongoDB
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (IllegalArgumentException e) {
+            // Exceção para argumentos inválidos, se aplicável
+            throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        } catch (Exception e) {
+            // Captura exceções gerais
+            throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
         if(delete ==0) throw new DocumentErrorException("Erro ao deletar documento", ErrorCodeEnum.DE0001.getCode()); 
         return delete;

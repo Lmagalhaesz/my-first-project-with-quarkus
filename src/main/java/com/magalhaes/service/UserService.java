@@ -8,10 +8,12 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 
 import com.magalhaes.exceptions.DataBaseErrorException;
+import com.magalhaes.exceptions.GenericException;
 import com.magalhaes.exceptions.UserErrorException;
 import com.magalhaes.exceptions.enums.ErrorCodeEnum;
 import com.magalhaes.model.User;
 import com.mongodb.MongoException;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -42,8 +44,20 @@ public class UserService {
             user.setPassword(user.getPassword());
             add = coll.insertOne(user).getInsertedId().asObjectId().getValue().toHexString();
             }
+        } catch (MongoWriteException e) {
+            // Exceção específica para falhas na escrita
+            throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
         } catch (MongoException e) {
-            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+            // Exceção geral do MongoDB
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (IllegalArgumentException e) {
+            // Exceção para argumentos inválidos, se aplicável
+            throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        } catch (Exception e) {
+            // Captura exceções gerais
+            throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
         if(add == null) throw new UserErrorException("Erro ao cadastrar usuário.", ErrorCodeEnum.UE0001.getCode());
         return add;
@@ -53,8 +67,20 @@ public class UserService {
         List<User> users = new ArrayList<>(); 
     try {
         users = coll.find().into(new ArrayList<>());
+    } catch (MongoWriteException e) {
+        // Exceção específica para falhas na escrita
+        throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                ErrorCodeEnum.DB0001.getCode());
     } catch (MongoException e) {
-        throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+        // Exceção geral do MongoDB
+        throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                ErrorCodeEnum.DB0001.getCode());
+    } catch (IllegalArgumentException e) {
+        // Exceção para argumentos inválidos, se aplicável
+        throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+    } catch (Exception e) {
+        // Captura exceções gerais
+        throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
     }
 
     if (users.isEmpty()) throw new UserErrorException("Não há nenhum usuário cadastrado", ErrorCodeEnum.UE0001.getCode());
@@ -72,11 +98,20 @@ public class UserService {
             
             return user;
     
-        } catch (IllegalArgumentException e) {
-            throw new UserErrorException("ID fornecido é inválido: " + id, ErrorCodeEnum.UE0001.getCode());
-            
+        } catch (MongoWriteException e) {
+            // Exceção específica para falhas na escrita
+            throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
         } catch (MongoException e) {
-            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+            // Exceção geral do MongoDB
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (IllegalArgumentException e) {
+            // Exceção para argumentos inválidos, se aplicável
+            throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        } catch (Exception e) {
+            // Captura exceções gerais
+            throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
     }
 
@@ -92,13 +127,20 @@ public class UserService {
             
             return deletedCount;
         
-        } catch (IllegalArgumentException e) {
-            // Captura erros de formatação de ObjectId inválido
-            throw new UserErrorException("ID fornecido é inválido: " + id, ErrorCodeEnum.UE0001.getCode());
-        
+        } catch (MongoWriteException e) {
+            // Exceção específica para falhas na escrita
+            throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
         } catch (MongoException e) {
-            // Captura erros de banco de dados
-            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
+            // Exceção geral do MongoDB
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (IllegalArgumentException e) {
+            // Exceção para argumentos inválidos, se aplicável
+            throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        } catch (Exception e) {
+            // Captura exceções gerais
+            throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
         
         
