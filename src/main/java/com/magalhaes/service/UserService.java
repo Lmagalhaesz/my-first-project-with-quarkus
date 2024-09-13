@@ -141,9 +141,7 @@ public class UserService {
         } catch (Exception e) {
             // Captura exceções gerais
             throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
-        }
-        
-        
+        }   
     }
       
 }

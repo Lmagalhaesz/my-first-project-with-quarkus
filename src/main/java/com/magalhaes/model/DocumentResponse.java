@@ -28,4 +28,12 @@ public class DocumentResponse {
         this.conteudo = document.getContent();
         this.owner = new UserDTO(user);  // Converte o usuário para o DTO
     }
+    public Document toDocument() {
+        return new Document(
+            this.id,
+            this.owner != null ? this.owner.getId() : null, // Assuming owner ID is needed
+            this.titulo,
+            this.conteudo
+        );
+    }
 }

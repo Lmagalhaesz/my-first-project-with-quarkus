@@ -2,8 +2,6 @@ package com.magalhaes.controller;
 
 import com.magalhaes.model.Directory;
 import com.magalhaes.model.DirectoryResponse;
-import com.magalhaes.model.Document;
-import com.magalhaes.model.DocumentResponse;
 import com.magalhaes.service.DirectoryService;
 import java.util.List;
 
@@ -32,11 +30,16 @@ public class DirectoryController {
     }
 
     // Endpoint para obter um documento por ID
-    /*@GET
-    @Path("/document/{id}")
-    public DocumentResponse getDocumentById(@PathParam("id") String id) {
-        return documentService.getDocumentById(id);
-    }*/
+    @GET
+    @Path("/directory/{id}")
+    public DirectoryResponse getDocumentById(@PathParam("id") String id) {
+        return directoryService.getDirectoryById(id);
+    }
+    @GET
+    @Path("/directories/{name}")
+    public List<DirectoryResponse> getDocumentByName(@PathParam("name") String name) {
+        return directoryService.getDirectoriesByUser(name);
+    }
 
     // Endpoint para adicionar um novo documento
     @POST
@@ -45,10 +48,10 @@ public class DirectoryController {
         return directoryService.addDirectory(directory);
     }
 
-    /*@DELETE
-    @Path("/document/{id}")
+    @DELETE
+    @Path("/directory/{id}")
     public long deleteDocument(@PathParam("id") String id) {
-        return documentService.deleteDocument(id);
-    }*/
+        return directoryService.deleteDirectory(id);
+    }
 
 }

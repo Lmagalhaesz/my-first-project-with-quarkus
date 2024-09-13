@@ -31,36 +31,40 @@ public class DocumentService {
     public DocumentService(MongoClient mongoClient) {
         this.mongoClient = mongoClient;
         this.documentCollection = mongoClient.getDatabase("test").getCollection("documents", Document.class);
-        this.userCollection = mongoClient.getDatabase("test").getCollection("users", User.class);  // Coleção de usuários
+        this.userCollection = mongoClient.getDatabase("test").getCollection("users", User.class); // Coleção de usuários
     }
 
     public List<DocumentResponse> getDocumentsWithOwner() {
-    List<DocumentResponse> documentResponses = new ArrayList<>();
-    try {
-        List<Document> documents = documentCollection.find().into(new ArrayList<>());
+        List<DocumentResponse> documentResponses = new ArrayList<>();
+        try {
+            List<Document> documents = documentCollection.find().into(new ArrayList<>());
 
-        for (Document document : documents) {
-            User user = userCollection.find(Filters.eq("_id", document.getUserId())).first();
-            
-            if (user == null) {
-                throw new DocumentErrorException("Usuário não encontrado para o documento: " + document.getId(), ErrorCodeEnum.DE0001.getCode());
+            for (Document document : documents) {
+                User user = userCollection.find(Filters.eq("_id", document.getUserId())).first();
+
+                /*
+                 * if (user == null) {
+                 * throw new DocumentErrorException("Usuário não encontrado para o documento: "
+                 * + document.getId(), ErrorCodeEnum.DE0001.getCode());
+                 * }
+                 */
+
+                DocumentResponse documentResponse = new DocumentResponse(document, user);
+                documentResponses.add(documentResponse);
             }
-            
-            DocumentResponse documentResponse = new DocumentResponse(document, user);
-            documentResponses.add(documentResponse);
+
+        } catch (MongoException e) {
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (DocumentErrorException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
-
-    } catch (MongoException e) {
-        throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(), ErrorCodeEnum.DB0001.getCode());
-    } catch (DocumentErrorException e) {
-        throw e;
-    } catch (Exception e) {
-        throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        if (documentResponses.size() == 0)
+            throw new DocumentErrorException("Nenhum documento encontrado.", ErrorCodeEnum.DE0001.getCode());
+        return documentResponses;
     }
-    if(documentResponses.size() == 0) throw new DocumentErrorException("Nenhum documento encontrado.", ErrorCodeEnum.DE0001.getCode()); 
-    return documentResponses;
-}
-
 
     public DocumentResponse getDocumentById(String id) {
 
@@ -69,13 +73,16 @@ public class DocumentService {
         try {
             ObjectId objectId = new ObjectId(id);
 
-        document = documentCollection.find(Filters.eq("_id", objectId)).first();
+            document = documentCollection.find(Filters.eq("_id", objectId)).first();
 
-        if (document == null) throw new DocumentErrorException("Documento é nulo", ErrorCodeEnum.DE0001.getCode());
+            if (document == null)
+                throw new DocumentErrorException("Documento é nulo", ErrorCodeEnum.DE0001.getCode());
 
-        user = userCollection.find(Filters.eq("_id", document.getUserId())).first();
+            user = userCollection.find(Filters.eq("_id", document.getUserId())).first();
 
-        if(user == null) throw new DocumentErrorException("Usuário não encontrado para o documento: " + document.getId(), ErrorCodeEnum.DE0001.getCode());
+            if (user == null)
+                throw new DocumentErrorException("Usuário não encontrado para o documento: " + document.getId(),
+                        ErrorCodeEnum.DE0001.getCode());
 
         } catch (MongoWriteException e) {
             // Exceção específica para falhas na escrita
@@ -92,10 +99,42 @@ public class DocumentService {
             // Captura exceções gerais
             throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
-        
 
         return new DocumentResponse(document, user);
     }
+
+    public List<Document> getDocumentsByUserId(ObjectId id) {
+        List<DocumentResponse> documentResponses = new ArrayList<>();
+        List<Document> documentsUser = new ArrayList<>();
+        try {
+            documentResponses = this.getDocumentsWithOwner();
+    
+            for (DocumentResponse documentResponse : documentResponses) {
+                if (documentResponse.getOwner() != null && documentResponse.getOwner().getId().equals(id)) {
+                    documentsUser.add(documentResponse.toDocument());
+                }
+            }
+    
+        } catch (MongoWriteException e) {
+            throw new DataBaseErrorException("Erro ao escrever no banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (MongoException e) {
+            throw new DataBaseErrorException("Erro de banco de dados: " + e.getMessage(),
+                    ErrorCodeEnum.DB0001.getCode());
+        } catch (IllegalArgumentException e) {
+            throw new GenericException("Argumento inválido: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        } catch (Exception e) {
+            throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
+        }
+    
+        // Lança exceção se não encontrar documentos para o usuário
+        if (documentsUser.isEmpty()) {
+            throw new DocumentErrorException("Usuário não tem nenhum documento.", ErrorCodeEnum.DE0001.getCode());
+        }
+    
+        return documentsUser;
+    }
+    
 
     public String addDocument(Document document) {
         String add = null;
@@ -116,7 +155,8 @@ public class DocumentService {
             // Captura exceções gerais
             throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
-        if (add == null) throw new DocumentErrorException("Erro ao adicionar documento", ErrorCodeEnum.DE0001.getCode()); 
+        if (add == null)
+            throw new DocumentErrorException("Erro ao adicionar documento", ErrorCodeEnum.DE0001.getCode());
         return add;
     }
 
@@ -140,7 +180,8 @@ public class DocumentService {
             // Captura exceções gerais
             throw new GenericException("Erro inesperado: " + e.getMessage(), ErrorCodeEnum.GE0001.getCode());
         }
-        if(delete ==0) throw new DocumentErrorException("Erro ao deletar documento", ErrorCodeEnum.DE0001.getCode()); 
+        if (delete == 0)
+            throw new DocumentErrorException("Erro ao deletar documento", ErrorCodeEnum.DE0001.getCode());
         return delete;
     }
 }
